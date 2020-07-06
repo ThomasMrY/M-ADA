@@ -26,8 +26,8 @@ def load_mnist(data_dir, split='train'):
     image_dir = os.path.join(data_dir, 'mnist', image_file)
     with open(image_dir, 'rb') as f:
         mnist = pickle.load(f, encoding="bytes")
-    images = mnist[b'X']
-    labels = mnist[b'y']
+    images = mnist['X']
+    labels = mnist['y']
     images = images / 255.
     images = np.stack((images, images, images), axis=3)  # grayscale to rgb
     return np.squeeze(images[:10000]), labels[:10000]

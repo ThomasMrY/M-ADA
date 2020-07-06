@@ -9,12 +9,13 @@ from models.ada_conv import ConvNet, WAE, Adversary
 import numpy
 from metann import Learner
 from utils.digits_process_dataset import *
+from utils.ops import *
 
 torch.manual_seed(0)
 numpy.random.seed(0)
 
 parser = argparse.ArgumentParser(description='Training on Digits')
-parser.add_argument('--data_dir', default='data', type=str,
+parser.add_argument('--data_dir', default='./utils/data', type=str,
                     help='dataset dir')
 parser.add_argument('--dataset', default='mnist', type=str,
                     help='dataset mnist or cifar10')
@@ -165,7 +166,7 @@ def train(model, exp_name, kwargs):
                     relaxation = mse_loss(recon_batch, recon_batch_aug)
                     adv_loss = -(args.beta * relaxation + ce_loss - args.gamma * constraint)
                     aug_optimizer.zero_grad()
-                    adv_loss.backward()
+                    adv_loss.backward(retain_graph=True)
                     aug_optimizer.step()
 
                 virtual_test_images.append(input_aug.data.cpu().numpy())
@@ -296,7 +297,7 @@ def wae_train(model, D, new_aug_loader, optimizer, d_optimizer, epoch):
 
         total_D_loss = param * D_loss
         d_optimizer.zero_grad()
-        total_D_loss.backward()
+        total_D_loss.backward(retain_graph=True)
         d_optimizer.step()
 
         BCE = F.binary_cross_entropy(recon_batch, input_comb.view(-1, 3072), reduction='sum')
